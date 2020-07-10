@@ -15,9 +15,9 @@ public class CityCrudRequest {
 
     @NotNull
     @NotEmpty
-    private String cityName;
+    private String name;
 
     @NotNull
     @NotEmpty
-    private String cityDescription;
+    private String description;
 }

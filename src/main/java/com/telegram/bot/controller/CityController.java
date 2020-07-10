@@ -29,17 +29,17 @@ public class CityController {
     @GetMapping("/get")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<City> getCityDescription(String name) {
+    public ResponseEntity<City> getCityDescription(@RequestBody String name) {
         return new ResponseEntity<>(cityService.findByName(name), HttpStatus.OK);
     }
 
     @PostMapping("/create")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<City> createCity(@Valid CityCrudRequest request) {
+    public ResponseEntity<City> createCity(@RequestBody @Valid CityCrudRequest request) {
         City city = new City();
-        city.setName(request.getCityName());
-        city.setDescription(request.getCityDescription());
+        city.setName(request.getName());
+        city.setDescription(request.getDescription());
 
         return new ResponseEntity<>(cityService.save(city), HttpStatus.OK);
     }
@@ -47,9 +47,9 @@ public class CityController {
     @PostMapping("/update")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<City> updateCity(@Valid CityCrudRequest request) {
-        City city = cityService.findByName(request.getCityName());
-        city.setDescription(request.getCityDescription());
+    public ResponseEntity<City> updateCity(@RequestBody @Valid CityCrudRequest request) {
+        City city = cityService.findByName(request.getName());
+        city.setDescription(request.getDescription());
 
         return new ResponseEntity<>(cityService.update(city), HttpStatus.OK);
     }
@@ -57,8 +57,8 @@ public class CityController {
     @PostMapping("/delete")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> deleteCity(@Valid CityCrudRequest request) {
-        City city = cityService.findByName(request.getCityName());
+    public ResponseEntity<String> deleteCity(@RequestBody @Valid CityCrudRequest request) {
+        City city = cityService.findByName(request.getName());
         cityService.delete(city.getId());
 
         return new ResponseEntity<>("Удалено", HttpStatus.OK);

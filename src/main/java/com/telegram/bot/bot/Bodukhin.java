@@ -5,11 +5,9 @@ import com.telegram.bot.domain.City;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -20,7 +18,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,21 +40,88 @@ public class Bodukhin extends TelegramLongPollingBot {
             city.setDescription(arg.get(1));
 
             String postUrl = "http://localhost:8080/city/create";
-            JSONObject returnedCity = fromBotToDb(city, postUrl, HttpMethod.POST);
-            String outMessage = returnedCity.getString("name") + " - " + returnedCity.getString("description");
+            ResponseEntity<String> responseEntity = fromBotToDb(city, postUrl, HttpMethod.POST);
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                JSONObject jsonEntity = new JSONObject(responseEntity.getBody());
+                String outMessage = jsonEntity.getString("name")
+                        + " - " + jsonEntity.getString("description");
+                sendMsg(update.getMessage().getChatId().toString(), outMessage);
+            } else {
+                sendMsg(update.getMessage().getChatId().toString(), "Ошибка, город уже существует!");
+            }
+        } else if (message.startsWith("/all")) {
+            City city = new City();
+            city.setName("name");
+            StringBuilder outMessage = new StringBuilder();
 
-            sendMsg(update.getMessage().getChatId().toString(), outMessage);
+            String getUrl = "http://localhost:8080/city/all";
+            ResponseEntity<String> responseEntity = fromBotToDb(city, getUrl, HttpMethod.GET);
+
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                JSONArray jsonArray = new JSONArray(responseEntity.getBody());
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    outMessage.append(jsonArray.getJSONObject(i).getString("name"))
+                            .append(System.getProperty("line.separator"));
+                }
+                sendMsg(update.getMessage().getChatId().toString(), outMessage.toString());
+            } else {
+                sendMsg(update.getMessage().getChatId().toString(), "Произошла ошибка!");
+            }
+        } else if (message.startsWith("/update")) {
+            List<String> arg = getArguments(message);
+
+            City city = new City();
+            city.setName(arg.get(0));
+            city.setDescription(arg.get(1));
+
+            String postUrl = "http://localhost:8080/city/update";
+            ResponseEntity<String> responseEntity = fromBotToDb(city, postUrl, HttpMethod.POST);
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                JSONObject jsonEntity = new JSONObject(responseEntity.getBody());
+                String outMessage = jsonEntity.getString("name")
+                        + " - " + jsonEntity.getString("description");
+                sendMsg(update.getMessage().getChatId().toString(), outMessage);
+            } else {
+                sendMsg(update.getMessage().getChatId().toString(), "Возникла ошибка при обновлении города!");
+            }
+        } else if (message.startsWith("/delete")) {
+            List<String> arg = getArguments(message);
+
+            City city = new City();
+            city.setName(arg.get(0));
+            city.setDescription("description");
+
+            String deleteUrl = "http://localhost:8080/city/delete";
+            ResponseEntity<String> responseEntity = fromBotToDb(city, deleteUrl, HttpMethod.DELETE);
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                sendMsg(update.getMessage().getChatId().toString(), "Удалено успешно!");
+            } else {
+                sendMsg(update.getMessage().getChatId().toString(), "Возникла ошибка при удалении города!");
+            }
+        } else {
+            City city = new City();
+            city.setName(message.trim());
+            city.setDescription("description");
+
+            String getUrl = "http://localhost:8080/city/find";
+            ResponseEntity<String> responseEntity = fromBotToDb(city, getUrl, HttpMethod.POST);
+            if (responseEntity.getBody() != null) {
+                JSONObject jsonEntity = new JSONObject(responseEntity.getBody());
+                String outMessage = jsonEntity.getString("description");
+                sendMsg(update.getMessage().getChatId().toString(), outMessage);
+            } else {
+                sendMsg(update.getMessage().getChatId().toString(), "Город не найден!");
+            }
         }
-        //sendMsg(update.getMessage().getChatId().toString(), message);
     }
 
-    private JSONObject fromBotToDb(City city, String url, HttpMethod method) {
+    private ResponseEntity<String> fromBotToDb(City city, String url, HttpMethod method) {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         HttpEntity<City> entity = new HttpEntity<>(city, headers);
         RestTemplate restTemplate = new RestTemplate();
 
-        return new JSONObject(Objects.requireNonNull(restTemplate.exchange(url, method, entity, String.class).getBody()));
+        return restTemplate.exchange(url, method, entity, String.class);
     }
 
 

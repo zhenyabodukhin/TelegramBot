@@ -26,16 +26,16 @@ public class CityController {
         return new ResponseEntity<>(cityService.findAll(), HttpStatus.OK);
     }
 
-    @GetMapping("/get")
+    @PostMapping("/find")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<City> getCityDescription(@RequestBody String name) {
-        return new ResponseEntity<>(cityService.findByName(name), HttpStatus.OK);
+    public ResponseEntity<City> getCityDescription(@RequestBody @Valid CityCrudRequest request) {
+        return new ResponseEntity<>(cityService.findByName(request.getName()), HttpStatus.OK);
     }
 
     @PostMapping("/create")
     @ResponseBody
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<City> createCity(@RequestBody @Valid CityCrudRequest request) {
         City city = new City();
         city.setName(request.getName());
@@ -54,7 +54,7 @@ public class CityController {
         return new ResponseEntity<>(cityService.update(city), HttpStatus.OK);
     }
 
-    @PostMapping("/delete")
+    @DeleteMapping("/delete")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<String> deleteCity(@RequestBody @Valid CityCrudRequest request) {

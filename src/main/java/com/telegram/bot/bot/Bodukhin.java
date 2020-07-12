@@ -98,6 +98,8 @@ public class Bodukhin extends TelegramLongPollingBot {
             } else {
                 sendMsg(update.getMessage().getChatId().toString(), "Возникла ошибка при удалении города!");
             }
+        } else if (message.startsWith("/start")) {
+            sendMsg(update.getMessage().getChatId().toString(), "Поехали! Введите город для поиска!");
         } else {
             City city = new City();
             city.setName(message.trim());
@@ -110,20 +112,10 @@ public class Bodukhin extends TelegramLongPollingBot {
                 String outMessage = jsonEntity.getString("description");
                 sendMsg(update.getMessage().getChatId().toString(), outMessage);
             } else {
-                sendMsg(update.getMessage().getChatId().toString(), "Город не найден!");
+                sendMsg(update.getMessage().getChatId().toString(), "Город не найден! Вы можете создать его.");
             }
         }
     }
-
-    private ResponseEntity<String> fromBotToDb(City city, String url, HttpMethod method) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        HttpEntity<City> entity = new HttpEntity<>(city, headers);
-        RestTemplate restTemplate = new RestTemplate();
-
-        return restTemplate.exchange(url, method, entity, String.class);
-    }
-
 
     public synchronized void sendMsg(String chatId, String s) {
         SendMessage sendMessage = new SendMessage();
@@ -145,6 +137,15 @@ public class Bodukhin extends TelegramLongPollingBot {
     @Override
     public String getBotToken() {
         return botConfig.getToken();
+    }
+
+    private ResponseEntity<String> fromBotToDb(City city, String url, HttpMethod method) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        HttpEntity<City> entity = new HttpEntity<>(city, headers);
+        RestTemplate restTemplate = new RestTemplate();
+
+        return restTemplate.exchange(url, method, entity, String.class);
     }
 
     private List<String> getArguments(String message) {

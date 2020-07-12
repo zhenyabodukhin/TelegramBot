@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    username: postgres
+    password: root
+  flyway:
+    enabled: true
+    ignore-missing-migrations: true
+    locations: classpath:/migrations
+    baseline-on-migrate: true
+    baseline-description: Flyway Scripts
+    url: "jdbc:postgresql://localhost:5432/telegram"
+    user: postgres
+    password: root
+datasource:
+  driverName: org.postgresql.Driver
+  url: "jdbc:postgresql://localhost:5432/telegram"
+  login: postgres
+  password: root
+  initialSize: 10
+  maxActive: 7
+botconfig:
+  name: bodukhin
+  token: 1364225551:AAEtSAk2BRy0_TxgO21mSRHqlCFP-K5D6JE

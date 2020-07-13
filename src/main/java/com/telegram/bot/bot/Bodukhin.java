@@ -99,7 +99,10 @@ public class Bodukhin extends TelegramLongPollingBot {
                 sendMsg(update.getMessage().getChatId().toString(), "Возникла ошибка при удалении города!");
             }
         } else if (message.startsWith("/start")) {
-            sendMsg(update.getMessage().getChatId().toString(), "Поехали! Введите город для поиска!");
+            sendMsg(update.getMessage().getChatId().toString(), "Основные команды\n" + "all - показать список доступных городов\n" +
+                    "add - добавить новый город (/add \"Название города\")\n" +
+                    "update - обновить город (/update \"Название города\" \"Описание\")\n" +
+                    "delete - удалить город (/delete \"Название города\")");
         } else {
             City city = new City();
             city.setName(message.trim());

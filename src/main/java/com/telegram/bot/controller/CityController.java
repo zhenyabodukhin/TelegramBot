@@ -6,6 +6,7 @@ import com.telegram.bot.service.impl.CityServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -20,7 +21,6 @@ public class CityController {
     private final CityServiceImpl cityService;
 
     @GetMapping("/all")
-    @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<City>> getCities() {
         return new ResponseEntity<>(cityService.findAll(), HttpStatus.OK);
@@ -29,14 +29,15 @@ public class CityController {
     @PostMapping("/find")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<City> getCityDescription(@RequestBody @Valid CityCrudRequest request) {
+    public ResponseEntity<City> getCityDescription(@Valid @RequestBody CityCrudRequest request) {
         return new ResponseEntity<>(cityService.findByName(request.getName()), HttpStatus.OK);
     }
 
     @PostMapping("/create")
     @ResponseBody
+    @Transactional
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<City> createCity(@RequestBody @Valid CityCrudRequest request) {
+    public ResponseEntity<City> createCity(@Valid @RequestBody CityCrudRequest request) {
         City city = new City();
         city.setName(request.getName());
         city.setDescription(request.getDescription());
@@ -46,8 +47,9 @@ public class CityController {
 
     @PostMapping("/update")
     @ResponseBody
+    @Transactional
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<City> updateCity(@RequestBody @Valid CityCrudRequest request) {
+    public ResponseEntity<City> updateCity(@Valid @RequestBody CityCrudRequest request) {
         City city = cityService.findByName(request.getName());
         city.setDescription(request.getDescription());
 
@@ -56,8 +58,9 @@ public class CityController {
 
     @DeleteMapping("/delete")
     @ResponseBody
+    @Transactional
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> deleteCity(@RequestBody @Valid CityCrudRequest request) {
+    public ResponseEntity<String> deleteCity(@Valid @RequestBody CityCrudRequest request) {
         City city = cityService.findByName(request.getName());
         cityService.delete(city.getId());
 

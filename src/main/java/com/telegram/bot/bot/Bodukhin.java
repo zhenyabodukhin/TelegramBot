@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -47,11 +48,11 @@ public class Bodukhin extends TelegramLongPollingBot {
                         + " - " + jsonEntity.getString("description");
                 sendMsg(update.getMessage().getChatId().toString(), outMessage);
             } else {
-                sendMsg(update.getMessage().getChatId().toString(), "Ошибка, город уже существует!");
+                sendMsg(update.getMessage().getChatId().toString(), "Ошибка, валидация не прошла либо город уже существует!");
             }
         } else if (message.startsWith("/all")) {
             City city = new City();
-            city.setName("name");
+            city.setName("Имя");
             StringBuilder outMessage = new StringBuilder();
 
             String getUrl = "http://localhost:8080/city/all";
@@ -148,7 +149,11 @@ public class Bodukhin extends TelegramLongPollingBot {
         HttpEntity<City> entity = new HttpEntity<>(city, headers);
         RestTemplate restTemplate = new RestTemplate();
 
-        return restTemplate.exchange(url, method, entity, String.class);
+        try {
+            return restTemplate.exchange(url, method, entity, String.class);
+        } catch (HttpClientErrorException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     private List<String> getArguments(String message) {

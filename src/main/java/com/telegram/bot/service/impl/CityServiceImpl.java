@@ -7,6 +7,7 @@ import com.telegram.bot.repository.CityRepository;
 import com.telegram.bot.service.CityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,7 @@ public class CityServiceImpl implements CityService {
     }
 
     @Override
+    @Transactional
     public City save(City city) {
         String name = city.getName();
         City result = cityRepository.findByName(name);
@@ -34,6 +36,7 @@ public class CityServiceImpl implements CityService {
     }
 
     @Override
+    @Transactional
     public City update(City city) {
         String name = city.getName();
         City result = cityRepository.findByName(name);
@@ -45,6 +48,7 @@ public class CityServiceImpl implements CityService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         if(cityRepository.findById(id).isPresent()) {
             cityRepository.deleteById(id);

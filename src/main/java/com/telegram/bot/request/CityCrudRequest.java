@@ -5,6 +5,7 @@ import lombok.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 @Getter
 @Setter
@@ -16,10 +17,12 @@ public class CityCrudRequest {
 
     @NotNull
     @NotEmpty
-    @Pattern(regexp = "[А-Яа-я]+")
+    @Size(min = 2, max = 50)
+    @Pattern(regexp = "^[?!,.а-яА-ЯёЁ0-9\\s]+$")
     private String name;
 
     @NotNull
     @NotEmpty
+    @Size(min = 2, max = 255)
     private String description;
 }
